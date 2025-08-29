@@ -21,9 +21,9 @@ Voilà! Your are all set!
 
 There are three example in this repository doing exactly the same thing but using different method to achieve it.
 
-- **1-try-1-try-reka-openai**: Using the OpenAI SDK
-- **2-try-reka-ms-ext**: Using the Microsoft Extension AI for OpenAI
-- **3-try-reka-http**: Using the HttpClient to call Reka API directly
+- **[1-try-1-try-reka-openai](./1-try-reka-openai.cs)**: Using the OpenAI SDK
+- **[2-try-reka-ms-ext](./2-try-reka-ms-ext.cs)**: Using the Microsoft Extension AI for OpenAI
+- **[3-try-reka-http](./3-try-reka-http.cs)**: Using the HttpClient to call Reka API directly
 
 To try any of them you just need to open a terminal in the folder of the example you want to try and type:
 

@@ -2,7 +2,7 @@
 
 ![Reka AI](assets/reka-ai-cover.jpeg)
 
-[![Join our Discord](assets/discord-invite.png)](https://discord.com/invite/MTRJEBvH)
+[![Join our Discord](assets/discord-invite.png)](https://link.reka.ai/discord)
 
 This repository showcases how to use the **Reka Research** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use Reka Research with different tools and frameworks.
 

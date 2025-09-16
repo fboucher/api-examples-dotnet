@@ -15,7 +15,8 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 
 | Folder/File                                | Description                                                                |
 |--------------------------------------------|----------------------------------------------------------------------------|
-| [`csharp10-script/`](./csharp10-script/)   | 3 ways of using .NET 10 (preview) without projects with Reka's APIs        |
+| [`csharp10-script/`](./csharp10-script/README.md)   | 3 ways of using .NET 10 (preview) without projects with Reka's APIs        |
+| [`reka-restaurant/`](./reka-restaurant/README.md)   | Search Restaurant using Reka Search doing Deep Search with adv. features   |
 
 ## 🧪 Why use this repo?
 

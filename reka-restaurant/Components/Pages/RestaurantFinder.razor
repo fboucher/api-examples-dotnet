@@ -1,0 +1,132 @@
+@page "/restaurant-finder"
+@using Microsoft.AspNetCore.Components
+@using web.Components.Shared
+@using web.Domain
+@using System.Diagnostics
+@inject web.Services.RekaResearchService Service
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject web.Services.LocationService LocationService
+
+@rendermode InteractiveServer
+
+<PageTitle>Restaurant Finder</PageTitle>
+
+<h1>Find Restaurants</h1>
+
+<div>
+    <EditForm Model="@searchParameters">
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+
+            <DataAnnotationsValidator />
+            <FluentValidationSummary />
+            <div>
+                <FluentTextField    @bind-Value=searchParameters.Mood 
+                                    Label="What are you in the mood for?"
+                                    Required
+                                    Placeholder="ex: sushi"></FluentTextField>
+                <FluentValidationMessage For="@(() => searchParameters.Mood)" />
+            </div>
+
+            <FluentButton   @onclick="Search"
+                            Loading="@isLoading"
+                            IconStart="@(new Icons.Regular.Size16.ArrowClockwise())"  
+                            Appearance="Appearance.Accent">Search</FluentButton>
+        
+        </FluentStack>
+    </EditForm>
+</div>
+
+@if (isLoading)
+{
+    <FluentProgress></FluentProgress>
+}
+else if (restaurants.Any())
+{
+    <div>
+        <p>Request took: @($"{(int)elapsedTime.TotalMinutes}m {elapsedTime.Seconds}s")</p>
+    </div>
+    <FluentTabs>
+
+        <FluentTab Label="Results" Id="tab-result" Icon="@(new Icons.Filled.Size24.Food())" >
+            <FluentDataGrid Items="@restaurants" ResizableColumns="true" >
+                <ChildContent>
+                    <PropertyColumn Property="@(r => r.Name)" Title="Name" Sortable="true" />
+                    <PropertyColumn Property="@(r => r.Address ?? string.Empty)" Title="Address" Sortable="true" />
+                    <PropertyColumn Property="@(r => r.PhoneNumber ?? string.Empty)" Title="Phone Number" Sortable="true"  />
+                    <TemplateColumn Title="Website" Sortable="true" >
+                        <FluentAnchor Href="@(context.Website ?? "#")" title="Anchor tooltip" Appearance="Appearance.Hypertext">@(context.Website ?? "N/A")</FluentAnchor>
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(r => r.Score)" Title="Score" Sortable="true" />
+                    <PropertyColumn Property="@(r => r.PriceLevel ?? string.Empty)" Title="Price Level" Sortable="true" />
+                </ChildContent>
+                <EmptyContent>
+                    <FluentIcon Value="@(new Icons.Filled.Size24.Crown())" Color="@Color.Accent" />&nbsp; Nothing so far, pick what you would like to eat first!
+                </EmptyContent>
+            </FluentDataGrid>
+
+        </FluentTab>
+
+        <FluentTab Label="Reasoning"  Id="tab-reasons" Icon="@(new Icons.Filled.Size24.Map())">
+            @if (reasoningSteps.Any())
+            {
+                @foreach (var step in reasoningSteps)
+                {
+                    <ReasoningStepDisplay Step="step" />
+                }
+            }
+            else
+            {
+                <p>No reasoning steps available.</p>
+            }
+        </FluentTab>
+
+    </FluentTabs>
+}
+
+
+@code {
+    private SearchParameters searchParameters = new();
+    private IQueryable<Restaurant> restaurants = new List<Restaurant>().AsQueryable();
+    private bool isLoading = false;
+    private List<ReasoningStep> reasoningSteps = new();
+    private TimeSpan elapsedTime = TimeSpan.Zero;
+
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchParameters.Mood)) return;
+
+        isLoading = true;
+        try
+        {
+            var position = await JSRuntime.InvokeAsync<Position>("eval", "new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(p => resolve({Coordinates: {Latitude: p.coords.latitude, Longitude: p.coords.longitude}}), reject); })");
+            if (position != null)
+            {
+                var city = await LocationService.GetCityFromPosition(position);
+                if (city != null)
+                {
+                    searchParameters.City = city;
+                }
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+            var result = await Service.GetRestaurantReferences(searchParameters.Mood, searchParameters.City ?? "montreal");
+
+            stopwatch.Stop();
+            elapsedTime = stopwatch.Elapsed;
+            restaurants = result.Restaurants.AsQueryable();
+            reasoningSteps = result.ReasoningSteps;
+        }
+        catch (Exception)
+        {
+            // Handle error, maybe show a message
+            restaurants = new List<Restaurant>().AsQueryable();
+            reasoningSteps = new();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
+

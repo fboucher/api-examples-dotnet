@@ -33,5 +33,5 @@ Open the project in your favorite IDE/ editor and you can look at [Services/Reka
 
 - [Docs: Reka Research API](https://docs.reka.ai/research)
 - [Blog Post: How to Leverage Reka Research to Build Smarter AI Apps](https://reka.ai/news/how-to-leverage-reka-research-to-build-smarter-ai-apps)
-- [Discord]((https://link.reka.ai/discord))
+- [Discord](https://link.reka.ai/discord)
 

@@ -2,6 +2,8 @@
 
 This demo showcases how to use the **Reka Research** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use Reka Research and use the advanced features.
 
+![screen capture](../assets/capture-restaurant.png)
+
 > Requirement:
 >
 > - Have .NET 9 installed or Docker or CodeSpace

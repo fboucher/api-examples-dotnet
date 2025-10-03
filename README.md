@@ -4,7 +4,7 @@
 
 [![Join our Discord](assets/discord-invite.png)](https://link.reka.ai/discord)
 
-This repository showcases how to use the **Reka Research** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use Reka Research with different tools and frameworks.
+This repository showcases how to use **Reka Research** and **Reka Vision** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use Reka Research with different tools and frameworks.
 
 ## 📋 More Examples in Other Languages
 
@@ -13,24 +13,27 @@ This repository showcases how to use the **Reka Research** to build intelligent 
 
 ## 📚 What's in this repo
 
-| Folder/File                                | Description                                                                |
-|--------------------------------------------|----------------------------------------------------------------------------|
-| [`csharp10-script/`](./csharp10-script/README.md)   | 3 ways of using .NET 10 (preview) without projects with Reka's APIs        |
-| [`reka-restaurant/`](./reka-restaurant/README.md)   | Search Restaurant using Reka Search doing Deep Search with adv. features   |
+| Folder/File                                        | Description                                                                   |
+|----------------------------------------------------|-------------------------------------------------------------------------------|
+| [`csharp10-script/`](./csharp10-script/README.md)  | Three ways to use C# 10 file-based (preview) without full projects via Reka APIs |
+| [`reka-restaurant/`](./reka-restaurant/README.md)  | Restaurant search sample using Reka Deep Search with advanced features        |
+| [`video-analyzer/`](./video-analyzer/README.md)    | Get insights from videos using AI. Search across multiple videos or inspect one |
 
 ## 🧪 Why use this repo?
 
-- Learn how to use Reka Research with requests and OpenAI SDK
+- Learn how to use Reka Research with raw HTTP requests and the OpenAI‑compatible SDK
 - Build agents that can think step-by-step and cite sources
 - Learn to control structured outputs using `response_format`
-- Control domain scope and search behavior using `web_search` config
+- Control domain scope and search behavior using the `web_search` configuration
 
 ## 🛠 Recommended Use Cases
 
 - Web search with control over allowed domains
 - Research agents with explainable reasoning steps
+- Video processing and analysis
 
 ## 🤝 Contributions
 
-If you find a bug or would like to add a feature, check out those resources:
-Check out our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing](CONTRIBUTING.md) docs.
+If you find a bug or would like to add a feature, please read our [Code of Conduct](CODE_OF_CONDUCT.md) and the [Contributing Guide](CONTRIBUTING.md).
+
+Feel free to open an issue or submit a PR—feedback and improvements are welcome.

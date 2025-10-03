@@ -53,7 +53,7 @@ You can change the prompt to get different recommendation or you can change the 
 
 This code was used in a blog post and video that you can find here
 
-- [Blog post](#)
-- [Video](#)
+- [Blog post: Using AI with .NET 10 Scripts: What Worked, What Didn’t, and Lessons Learned](https://www.frankysnotes.com/2025/09/using-ai-with-net-10-scripts-what.html)
+- [Video ](https://www.youtube.com/watch?v=JwFHKQkah30)
 
-
+  ![Using AI with .NET 10 Scripts: What Worked, What Didn’t, and Lessons Learned](../assets/dotnet-ai-file-based.jpg)

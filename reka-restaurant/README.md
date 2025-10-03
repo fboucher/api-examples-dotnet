@@ -10,7 +10,7 @@ If you don't have .NET install on you computer use the devContainer with [Docker
 
 ## 1. Get your API key
 
-1) Go to the Reka Platform dashboard
+1) Go to the [Reka Platform dashboard](https://link.reka.ai/free)
 2) Open the API Keys section on the left
 3) Create a new key and copy it to your environment
 4) Add the key into [appsettings.json)](appsettings.json) (or appsettings.Development.json).

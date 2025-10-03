@@ -15,7 +15,7 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
 
     public async Task<RestaurantResponse> GetRestaurantReferences(string mood, string nearCity)
     {
-        var requestUrl = "https://api.reka.ai/v1/chat/completions";
+        var requestUrl = "http://localhost:5085/research";
 
         var query = $"You are a restaurant recommender. User ask for {mood}. Provide Find 3 restaurants that match this mood. Always respond as JSON that matches the provided schema.";
 

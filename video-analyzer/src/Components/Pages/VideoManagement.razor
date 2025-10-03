@@ -1,0 +1,125 @@
+@page "/videos"
+@* @attribute [StreamRendering] *@
+@rendermode InteractiveServer
+@inject IRekaVisionService RekaVisionService
+@using VideoAnalyzer.Components.Dialog
+@using VideoAnalyzer.Components.Shared
+@using VideoAnalyzer.Domain
+@using Markdig
+@using Microsoft.AspNetCore.Components
+
+<PageTitle>Video Management</PageTitle>
+
+<h1>Video Management</h1>
+<FluentStack Orientation="Orientation.Vertical" Gap="10" HorizontalAlignment="HorizontalAlignment.Left" style="width: 100%;">
+    <div style="margin-bottom: 1rem;">
+        <FluentButton Appearance="Appearance.Accent" @onclick="OpenAddVideoDialog">
+            Add Video
+        </FluentButton>
+    </div>
+
+    <FluentDataGrid Id="videogrid" Items="@myVideos" RowSize="@DataGridRowSize.Large" Style="width: 90%;">
+        <ChildContent>
+
+            <SelectColumn @bind-SelectedItems="@selectedVideos" SelectMode="DataGridSelectMode.Single"></SelectColumn>
+
+            <TemplateColumn Title="Title" SortBy="@sortByTitle">
+                <a href="@context.Url" target="_blank">@context.Title</a>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Thumbnail">
+            @if (context.Metadata != null && !string.IsNullOrEmpty(context.Metadata.Thumbnail))
+            {
+                <img src="@context.Metadata.Thumbnail" alt="Thumbnail" style="width: 90px; height: auto;" />
+            }
+            else
+            {
+                <div style="width: 90px; height: 56px; background-color: #ccc; display: flex; align-items: center; justify-content: center; color: #666;">No Thumbnail</div>
+            }
+            </TemplateColumn>
+
+            <PropertyColumn Title="Status" Property="@(c => c.IndexingStatus.ToString())"
+                Sortable="true" />
+            <PropertyColumn Title="Type" Property="@(c => c.IndexingType)" Sortable="true" />
+            
+            <TemplateColumn Title="Actions">
+                <FluentButton Appearance="Appearance.Outline" @onclick="@(() => DeleteVideo(context.VideoId))">
+                    Delete
+                </FluentButton>
+            </TemplateColumn>
+        </ChildContent>
+        <EmptyContent>
+            <FluentIcon Value="@(new Icons.Filled.Size24.Crown())" Color="@Color.Accent" />&nbsp; Nothing to see here. Carry on!
+        </EmptyContent>
+    </FluentDataGrid>
+
+    @if (myVideos is not null && myVideos!.Any())
+    {
+        <div id="actions-section" style="width: 100%;">   
+        @if (selectedVideos != null && selectedVideos.Any())
+        {
+            <SingleVideoAction SelectedVideo="@selectedVideos.First()" />
+        }
+        else
+        {
+            <MultiVideoAction MyVideos="@myVideos" />
+        }
+        </div>
+    }
+
+</FluentStack>
+
+<AddVideoDialog @bind-Hidden="isDialogHidden" OnVideoAdded="HandleVideoAdded" />
+
+<br/><br/>
+
+@code {
+    private IQueryable<Video>? myVideos = null;
+    private bool isDialogHidden = true;
+
+    private IEnumerable<Video> selectedVideos = new List<Video>();
+
+    private GridSort<Video> sortByTitle = GridSort<Video>.ByAscending(v => v.Title);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var videoList = await RekaVisionService.GetAllVideos();
+            myVideos = videoList.AsQueryable();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching videos: {ex.Message}");
+            myVideos = new List<Video>().AsQueryable();
+        }
+    }
+
+    private void OpenAddVideoDialog()
+    {
+        isDialogHidden = false;
+    }
+
+    private async Task HandleVideoAdded(Video newVideo)
+    {
+        var videoList = await RekaVisionService.GetAllVideos();
+        myVideos = videoList.AsQueryable();
+    }
+
+    private async Task DeleteVideo(Guid videoId)
+    {
+        try
+        {
+            await RekaVisionService.DeleteVideos(new[] { videoId });
+
+            var videoList = await RekaVisionService.GetAllVideos();
+            myVideos = videoList.AsQueryable();
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting video: {ex.Message}");
+        }
+    }
+}

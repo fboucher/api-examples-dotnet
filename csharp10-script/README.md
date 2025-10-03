@@ -2,6 +2,8 @@
 
 Reka API's are compatible with open AI that made them very easy to swap and be used because it's a very common structure this represents to read you will see multiple example that use different different APIs and different and different scenario while using the latest feature of.net that is script. Script is a very fun feature where you don't need a project to have a program written in C#.
 
+![screen capture](../assets/capture-file-based.png)
+
 Requirement:
 
 - Have .NET 10 preview installed or Docker or CodeSpace

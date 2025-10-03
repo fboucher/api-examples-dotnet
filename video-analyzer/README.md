@@ -11,6 +11,8 @@ A web application that leverages Reka AI Vision to provide powerful video analys
 - **Presentation Evaluation**: Get feedback on presentation skills demonstrated in videos
 - **Modern UI**: Built with Microsoft Fluent UI for a clean, accessible interface
 
+![screen capture](../assets/capture-video-analyzer.png)
+
 ## Prerequisites
 
 - .NET 9.0 or Docker/Podman

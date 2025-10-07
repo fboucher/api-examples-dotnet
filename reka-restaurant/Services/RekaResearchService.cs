@@ -15,7 +15,8 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
 
     public async Task<RestaurantResponse> GetRestaurantReferences(string mood, string nearCity)
     {
-        var requestUrl = "http://localhost:5085/research";
+        //var requestUrl = "http://localhost:5085/research";
+        var requestUrl = "https://api.reka.ai/v1/chat/completions";
 
         var query = $"You are a restaurant recommender. User ask for {mood}. Provide Find 3 restaurants that match this mood. Always respond as JSON that matches the provided schema.";
 
@@ -41,13 +42,14 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
                 web_search = new
                 {
                     //allowed_domains = new string[] { "tripadvisor.com" },
-                    //blocked_domains = new string[] { "ubereats.com" },
-                    max_uses = 2,
+                    blocked_domains = new string[] { "ubereats.com" },
+                    max_uses = 4,
                     user_location = new
                     {
                         approximate = new
                         {
                             city = nearCity
+
                         }
                     }
                 }
@@ -60,6 +62,10 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
         });
 
         _logger.LogInformation($"Request Payload: {jsonPayload}");
+
+
+        await SaveToFile("request", mood, jsonPayload ?? string.Empty);
+
         HttpResponseMessage? response = null;
 
         try
@@ -137,10 +143,12 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
                                         type = "string",
                                         @enum = new[] { "$", "$$", "$$$" }
                                     }
-                                }
+                                },
+                                required = new[] { "name", "address", "phoneNumber", "website", "score", "priceLevel" }
                             }
                         }
-                    }
+                    },
+                    required = new[] { "restaurants" }
                 }
             }
         };

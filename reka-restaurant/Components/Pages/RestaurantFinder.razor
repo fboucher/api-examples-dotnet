@@ -40,6 +40,7 @@
 @if (isLoading)
 {
     <FluentProgress></FluentProgress>
+    <p>@status</p>
 }
 else if (restaurants.Any())
 {
@@ -91,6 +92,7 @@ else if (restaurants.Any())
     private bool isLoading = false;
     private List<ReasoningStep> reasoningSteps = new();
     private TimeSpan elapsedTime = TimeSpan.Zero;
+    private string status = "Getting started...";
 
     private async Task Search()
     {
@@ -99,6 +101,7 @@ else if (restaurants.Any())
         isLoading = true;
         try
         {
+            UpdateStatus("Getting your location...");
             var position = await JSRuntime.InvokeAsync<Position>("eval", "new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(p => resolve({Coordinates: {Latitude: p.coords.latitude, Longitude: p.coords.longitude}}), reject); })");
             if (position != null)
             {
@@ -106,27 +109,37 @@ else if (restaurants.Any())
                 if (city != null)
                 {
                     searchParameters.City = city;
+                    UpdateStatus($"Location found: {city}");
                 }
             }
 
             var stopwatch = Stopwatch.StartNew();
+            UpdateStatus("Searching for restaurants...");
             var result = await Service.GetRestaurantReferences(searchParameters.Mood, searchParameters.City ?? "montreal");
-
+            UpdateStatus("Processing results...");
             stopwatch.Stop();
             elapsedTime = stopwatch.Elapsed;
             restaurants = result.Restaurants.AsQueryable();
             reasoningSteps = result.ReasoningSteps;
+            UpdateStatus("Done!");
         }
         catch (Exception)
         {
             // Handle error, maybe show a message
             restaurants = new List<Restaurant>().AsQueryable();
             reasoningSteps = new();
+            UpdateStatus("An error occurred while searching. Please try again.");
         }
         finally
         {
             isLoading = false;
         }
+    }
+
+    private void UpdateStatus(string newStatus)
+    {
+        status = newStatus;
+        StateHasChanged();
     }
 }
 

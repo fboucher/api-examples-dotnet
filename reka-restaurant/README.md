@@ -35,12 +35,10 @@ Open the project in your favorite IDE/ editor and you can look at [Services/Reka
 
 Here is a diagram to illustrate where the information is coming from and going to during for initiate a Research.
 ```mermaid
-%%{ init : { "theme" : "forest", "look": "handDrawn", "flowchart" : { "curve" : "linear" }}}%%
-
+%%{ init : { "look": "handDrawn", "flowchart" : { "curve" : "linear" }}}%%
 
 flowchart LR
 
-   
         A[Restaurant Finder] --> B[browser]
         B --> |lat, lng| A
         A --> |lat, lng| C[GetCityFromCoordinates https://nominatim.openstreetmap.org]

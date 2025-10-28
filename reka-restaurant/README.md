@@ -31,6 +31,42 @@ Open the project in your favorite IDE/ editor and you can look at [Services/Reka
 - `response_format` to control the output
 - `max_uses` to limit the number of searches
 
+## Diagram
+
+Here is a diagram to illustrate where the information is coming from and going to during for initiate a Research.
+```mermaid
+%%{ init : { "theme" : "forest", "look": "handDrawn", "flowchart" : { "curve" : "linear" }}}%%
+
+
+flowchart LR
+
+   
+        A[Restaurant Finder] --> B[browser]
+        B --> |lat, lng| A
+        A --> |lat, lng| C[GetCityFromCoordinates https://nominatim.openstreetmap.org]
+        C --> |city, area| A
+   
+        A -->|mood, user location| D[Reka Research https://api.reka.ai/v1]
+        D --> |restaurants, reasoning steps| A
+```
+
+And here is a sequence diagram to illustrate the flow of information:
+
+```mermaid
+sequenceDiagram
+autonumber
+
+Restaurant Finder ->> Browser : Get Coordinates
+Browser->> Restaurant Finder: lat, lng
+
+Restaurant Finder ->> nominatim.openstreetmap.org: Get City From Coordinates
+nominatim.openstreetmap.org ->> Restaurant Finder: city, area
+
+Restaurant Finder ->> Reka Research  (api.reka.ai/v1) :mood, user location 
+Reka Research (api.reka.ai/v1) ->> Restaurant Finder: restaurants, reasoning steps
+  
+```
+
 ## References
 
 - [Docs: Reka Research API](https://docs.reka.ai/research)

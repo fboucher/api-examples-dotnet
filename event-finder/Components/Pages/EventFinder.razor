@@ -1,0 +1,150 @@
+@page "/event-finder"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.FluentUI.AspNetCore.Components
+@using event_finder.Components.Shared
+@using event_finder.Domain
+@using System.Diagnostics
+@inject event_finder.Services.RekaResearchService Service
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject event_finder.Services.LocationService LocationService
+
+@rendermode InteractiveServer
+
+<PageTitle>Event Finder</PageTitle>
+
+<h1>Find Tech Events</h1>
+
+<div>
+    <EditForm Model="@searchParameters">
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+
+            <DataAnnotationsValidator />
+            <FluentValidationSummary />
+            <div>
+                <FluentTextField    @bind-Value=searchParameters.Topic 
+                                    Label="What tech topic are you interested in?"
+                                    Required
+                                    Placeholder="ex: AI, cloud, .NET"></FluentTextField>
+            </div>
+
+            <FluentButton   @onclick="Search"
+                            Loading="@isLoading"
+                            IconStart="@(new Icons.Regular.Size16.ArrowClockwise())"  
+                            Appearance="Appearance.Accent">Search</FluentButton>
+        
+        </FluentStack>
+    </EditForm>
+    <div class="alert">Location is used only to bias results toward your city; no data is stored.</div>
+    <br />
+</div>
+
+@if (isLoading)
+{
+    <FluentProgress></FluentProgress>
+    <p>@status</p>
+}
+else if (events.Any())
+{
+    <div>
+        <p>Request took: @($"{(int)elapsedTime.TotalMinutes}m {elapsedTime.Seconds}s")</p>
+    </div>
+    <FluentTabs>
+
+    <FluentTab Label="Results" Id="tab-result" Icon="@(new Icons.Filled.Size24.Map())" >
+            <FluentDataGrid Items="@events" ResizableColumns="true" >
+                <ChildContent>
+                    <PropertyColumn Property="@(e => e.Name)" Title="Name" Sortable="true" />
+                    <TemplateColumn Title="Start" Sortable="true">
+                        @((context.StartDate?.ToString("yyyy-MM-dd")) ?? "")
+                    </TemplateColumn>
+                    <TemplateColumn Title="End" Sortable="true">
+                        @((context.EndDate?.ToString("yyyy-MM-dd")) ?? "")
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(e => e.City ?? string.Empty)" Title="City" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Country ?? string.Empty)" Title="Country" Sortable="true" />
+                    <TemplateColumn Title="URL" Sortable="true" >
+                        <FluentAnchor Href="@(context.Url ?? "#")" title="Event website" Appearance="Appearance.Hypertext">@(context.Url ?? "N/A")</FluentAnchor>
+                    </TemplateColumn>
+                </ChildContent>
+                <EmptyContent>
+                    <FluentIcon Value="@(new Icons.Filled.Size24.Crown())" Color="@Color.Accent" />&nbsp; Nothing yet. Pick a topic and search for events!
+                </EmptyContent>
+            </FluentDataGrid>
+
+        </FluentTab>
+
+        <FluentTab Label="Reasoning"  Id="tab-reasons" Icon="@(new Icons.Filled.Size24.Map())">
+            @if (reasoningSteps.Any())
+            {
+                @foreach (var step in reasoningSteps)
+                {
+                    <ReasoningStepDisplay Step="step" />
+                }
+            }
+            else
+            {
+                <p>No reasoning steps available.</p>
+            }
+        </FluentTab>
+
+    </FluentTabs>
+}
+
+
+@code {
+    private SearchParameters searchParameters = new();
+    private IQueryable<TechEvent> events = new List<TechEvent>().AsQueryable();
+    private bool isLoading = false;
+    private List<ReasoningStep> reasoningSteps = new();
+    private TimeSpan elapsedTime = TimeSpan.Zero;
+    private string status = "Getting started...";
+
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchParameters.Topic)) return;
+
+        isLoading = true;
+        try
+        {
+            UpdateStatus("Getting your location...");
+            var position = await JSRuntime.InvokeAsync<Position>("eval", "new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(p => resolve({Coordinates: {Latitude: p.coords.latitude, Longitude: p.coords.longitude}}), reject); })");
+            if (position != null)
+            {
+                var city = await LocationService.GetCityFromPosition(position);
+                if (city != null)
+                {
+                    searchParameters.City = city;
+                    UpdateStatus($"Location found: {city}");
+                }
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+            UpdateStatus("Searching for events...");
+            var result = await Service.GetEventReferences(searchParameters.Topic, searchParameters.City ?? "montreal");
+            UpdateStatus("Processing results...");
+            stopwatch.Stop();
+            elapsedTime = stopwatch.Elapsed;
+            events = result.Events.AsQueryable();
+            reasoningSteps = result.ReasoningSteps;
+            UpdateStatus("Done!");
+        }
+        catch (Exception)
+        {
+            events = new List<TechEvent>().AsQueryable();
+            reasoningSteps = new();
+            UpdateStatus("An error occurred while searching. Please try again.");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void UpdateStatus(string newStatus)
+    {
+        status = newStatus;
+        StateHasChanged();
+    }
+}

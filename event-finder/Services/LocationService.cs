@@ -50,7 +50,7 @@ public class LocationService
             {
                 return new UserLocationApproximate
                 {
-                    Town = "Montreal", //response.Address.City ?? response.Address.Town ?? response.Address.Village,
+                    Town = response.Address.City ?? response.Address.Town ?? response.Address.Village,
                     Region = response.Address.Region,
                     Country = response.Address.Country
                 };

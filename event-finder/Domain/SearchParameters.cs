@@ -3,5 +3,5 @@ namespace event_finder.Domain;
 public class SearchParameters
 {
     public string Topic { get; set; } = string.Empty;
-    public UserLocationApproximate? UserLocation { get; set; }
+    public UserLocationApproximate UserLocation { get; set; } = new UserLocationApproximate();
 }

@@ -18,7 +18,8 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
         //var requestUrl = "http://localhost:5085/research";
         var requestUrl = "https://api.reka.ai/v1/chat/completions";
 
-        var query = $"You are a tech events recommender. The user is interested in {topic}. Find 3 upcoming tech events related to this topic near the specified city. Always respond as JSON that matches the provided schema.";
+        var minDate = DateTime.UtcNow.Date.AddMonths(1).ToString("yyyy-MM-dd");
+        var query = $"You are a tech events recommender. The user is interested in {topic}. Find 3 upcoming tech events related to this topic occurring after {minDate}. Exclude any past events. Always respond as JSON that matches the provided schema.";
 
         var eventResponse = new EventResponse();
 

@@ -26,8 +26,27 @@
                 <FluentTextField    @bind-Value=searchParameters.Topic 
                                     Label="What tech topic are you interested in?"
                                     Required
-                                    Placeholder="ex: AI, cloud, .NET"></FluentTextField>
+                                    Placeholder="ex: AI, cloud, .NET"
+                                    style="width: 80%;"></FluentTextField>
             </div>
+
+            <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="10" VerticalGap="10" VerticalAlignment="VerticalAlignment.Bottom">
+                <FluentTextField 
+                    @bind-Value="searchParameters.UserLocation!.Town" 
+                    Label="Town / City" 
+                    Placeholder="ex: Seattle" 
+                    ReadOnly="@autoLocationRetrieved" />
+                <FluentTextField 
+                    @bind-Value="searchParameters.UserLocation!.Region" 
+                    Label="State / Region" 
+                    Placeholder="ex: WA" 
+                    ReadOnly="@autoLocationRetrieved" />
+                <FluentTextField 
+                    @bind-Value="searchParameters.UserLocation!.Country" 
+                    Label="Country" 
+                    Placeholder="ex: US" 
+                    ReadOnly="@autoLocationRetrieved" />
+            </FluentStack>
 
             <FluentButton   @onclick="Search"
                             Loading="@isLoading"
@@ -36,9 +55,9 @@
         
         </FluentStack>
     </EditForm>
-    <div class="alert">Location is used only to bias results toward your city; no data is stored.</div>
-    <br />
 </div>
+
+<p>@status</p>
 
 @if (isLoading)
 {
@@ -94,12 +113,48 @@ else if (events.Any())
 
 
 @code {
-    private SearchParameters searchParameters = new();
+    private SearchParameters searchParameters = new SearchParameters();
     private IQueryable<TechEvent> events = new List<TechEvent>().AsQueryable();
     private bool isLoading = false;
     private List<ReasoningStep> reasoningSteps = new();
     private TimeSpan elapsedTime = TimeSpan.Zero;
     private string status = "Getting started...";
+    private bool autoLocationRetrieved = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // ensure object exists for binding
+            searchParameters.UserLocation ??= new UserLocationApproximate();
+            try
+            {
+                UpdateStatus("Detecting your location...");
+                var position = await JSRuntime.InvokeAsync<Position>("eval", "new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(p => resolve({Coordinates: {Latitude: p.coords.latitude, Longitude: p.coords.longitude}}), reject); })");
+                if (position != null)
+                {
+                    var userLocation = await LocationService.GetLocationDetailsFromPosition(position);
+                    if (userLocation != null)
+                    {
+                        searchParameters.UserLocation.Town = userLocation.Town;
+                        searchParameters.UserLocation.Region = userLocation.Region;
+                        searchParameters.UserLocation.Country = userLocation.Country;
+                        autoLocationRetrieved = true;
+                        UpdateStatus($"Location found: {userLocation.Town}, {userLocation.Region}, {userLocation.Country}");
+                    }
+                    else
+                    {
+                        UpdateStatus("Could not resolve location details.");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                UpdateStatus("Location permission denied or unavailable.");
+            }
+            StateHasChanged();
+        }
+    }
 
     private async Task Search()
     {
@@ -108,22 +163,9 @@ else if (events.Any())
         isLoading = true;
         try
         {
-            UpdateStatus("Getting your location...");
-            var position = await JSRuntime.InvokeAsync<Position>("eval", "new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(p => resolve({Coordinates: {Latitude: p.coords.latitude, Longitude: p.coords.longitude}}), reject); })");
-            UserLocationApproximate? userLocation = null;
-            if (position != null)
-            {
-                userLocation = await LocationService.GetLocationDetailsFromPosition(position);
-                if (userLocation != null)
-                {
-                    searchParameters.UserLocation = userLocation;
-                    UpdateStatus($"Location found: {userLocation.Town}, {userLocation.Region}, {userLocation.Country}");
-                }
-            }
-
             var stopwatch = Stopwatch.StartNew();
             UpdateStatus("Searching for events...");
-            var result = await Service.GetEventReferences(searchParameters.Topic, userLocation);
+            var result = await Service.GetEventReferences(searchParameters.Topic, searchParameters.UserLocation);
             UpdateStatus("Processing results...");
             stopwatch.Stop();
             elapsedTime = stopwatch.Elapsed;

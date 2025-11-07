@@ -1,0 +1,67 @@
+using System.Net.Http.Json;
+using event_finder.Domain;
+
+namespace event_finder.Services;
+
+public class LocationService
+{
+    private readonly HttpClient _http;
+
+    public LocationService(HttpClient http)
+    {
+        _http = http;
+    }
+
+    // public async Task<string?> GetCityFromCoordinates(double lat, double lng)
+    // {
+    //     try
+    //     {
+    //         var url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lng}&zoom=10&addressdetails=1";
+    //         // Add User-Agent header as required by Nominatim
+    //         _http.DefaultRequestHeaders.UserAgent.ParseAdd("dotnet-events/1.0");
+    //         var response = await _http.GetFromJsonAsync<NominatimResponse>(url);
+    //         return response?.Address?.City ?? response?.Address?.Town ?? response?.Address?.Village;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Error in GetCityFromCoordinates: {ex.Message}");
+    //         return null;
+    //     }
+    // }
+
+    public async Task<UserLocationApproximate?> GetLocationDetailsFromPosition(Position position)
+    {
+        if (position?.Coordinates == null)
+        {
+            return null;
+        }
+
+        var lat = position.Coordinates.Latitude;
+        var lng = position.Coordinates.Longitude;
+
+        try
+        {
+            var url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lng}&zoom=10&addressdetails=1";
+            // Add User-Agent header as required by Nominatim
+            _http.DefaultRequestHeaders.UserAgent.ParseAdd("dotnet-events/1.0");
+            var response = await _http.GetFromJsonAsync<NominatimResponse>(url);
+            
+            if (response?.Address != null)
+            {
+                return new UserLocationApproximate
+                {
+                    Town = response.Address.City ?? response.Address.Town ?? response.Address.Village,
+                    Region = response.Address.Region,
+                    Country = response.Address.Country
+                };
+            }
+            
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in GetCityFromPosition: {ex.Message}");
+            return null;
+        }
+    }
+}

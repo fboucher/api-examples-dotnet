@@ -1,0 +1,76 @@
+@using event_finder.Domain
+@using System.Text.Json
+
+<div class="reasoning-step" style="margin-left: @(Depth * 20)px; margin-bottom: 15px; border-left: 3px solid #6366F1; padding-left: 10px;">
+    <div class="step-header" style="display: flex; align-items: center; margin-bottom: 8px;">
+        @if(Step.Role!.Equals("tool", StringComparison.OrdinalIgnoreCase)){
+            <FluentIcon Value="@(new Icons.Regular.Size20.Toolbox())" style="margin-right: 8px;" />
+        }
+        else{
+            <FluentIcon Value="@(new Icons.Regular.Size16.Person())" style="margin-right: 8px;" />
+        }
+    <strong style="color: #6366F1;">@Step.Role</strong>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(Step.ReasoningContent))
+    {
+        <p style="margin-bottom: 10px; line-height: 1.5;">@Step.ReasoningContent</p>
+    }
+    
+    @if (Step.Content != null)
+    {
+        <details style="margin-bottom: 10px;">
+            <summary style="cursor: pointer; font-weight: bold;">Content</summary>
+            <pre style="background-color: #EEF2FF; padding: 10px; border-radius: 4px; overflow-x: auto; margin-top: 5px;">@JsonSerializer.Serialize(Step.Content, new JsonSerializerOptions { WriteIndented = true })</pre>
+        </details>
+        
+        @DisplayNestedSteps(Step.Content)
+    }
+    
+    @if (Step.ToolCalls != null && Step.ToolCalls.Any())
+    {
+        <details style="margin-bottom: 10px;">
+            <summary style="cursor: pointer; font-weight: bold;">Tool Calls</summary>
+            <div style="margin-top: 5px;">
+                @foreach (var tool in Step.ToolCalls)
+                {
+                    <div style="margin-bottom: 10px; padding: 8px; background-color: #f8f8f8; border-radius: 4px;">
+                        <strong>@tool.Name</strong>
+                        @if (tool.Args != null)
+                        {
+                            <pre style="background-color: #EEF2FF; padding: 8px; border-radius: 4px; margin-top: 5px; overflow-x: auto;">@JsonSerializer.Serialize(tool.Args, new JsonSerializerOptions { WriteIndented = true })</pre>
+                            
+                            @DisplayNestedSteps(tool.Args)
+                        }
+                    </div>
+                }
+            </div>
+        </details>
+    }
+</div>
+
+@code {
+    [Parameter] public ReasoningStep Step { get; set; } = new();
+    [Parameter] public int Depth { get; set; } = 0;
+
+    private RenderFragment DisplayNestedSteps(object? obj)
+    {
+        if (obj is System.Collections.IDictionary dict && dict.Contains("reasoning_steps"))
+        {
+            var nestedSteps = dict["reasoning_steps"] as System.Collections.IEnumerable;
+            if (nestedSteps != null)
+            {
+                return @<div>
+                    @foreach (var item in nestedSteps)
+                    {
+                        if (item is ReasoningStep nestedStep)
+                        {
+                            <ReasoningStepDisplay Step="nestedStep" Depth="Depth + 1" />
+                        }
+                    }
+                </div>;
+            }
+        }
+        return @<div></div>;
+    }
+}

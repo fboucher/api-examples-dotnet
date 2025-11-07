@@ -13,7 +13,7 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
     private readonly ILogger<RekaResearchService> _logger = logger;
 
 
-    public async Task<EventResponse> GetEventReferences(string topic, UserLocationApproximate? userLocationApproximate)
+    public async Task<EventResponse> GetEventReferences(string topic, UserLocationApproximate? userLocationApproximate, string[]? allowedDomains = null, string[]? blockedDomains = null)
     {
         //var requestUrl = "http://localhost:5085/research";
         var requestUrl = "https://api.reka.ai/v1/chat/completions";
@@ -23,38 +23,56 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
 
         var eventResponse = new EventResponse();
 
+        var webSearch = new Dictionary<string, object>
+        {
+            ["max_uses"] = 3
+        };
+
+        var approximate = new Dictionary<string, string>();
+        if (!string.IsNullOrEmpty(userLocationApproximate?.Town))
+        {
+            approximate["city"] = userLocationApproximate.Town;
+        }
+        if (!string.IsNullOrEmpty(userLocationApproximate?.Region))
+        {
+            approximate["region"] = userLocationApproximate.Region;
+        }
+        if (!string.IsNullOrEmpty(userLocationApproximate?.Country))
+        {
+            approximate["country"] = userLocationApproximate.Country;
+        }
+
+        if (approximate.Count > 0)
+        {
+            webSearch["user_location"] = new { approximate };
+        }
+
+        if (allowedDomains != null && allowedDomains.Length > 0)
+        {
+            webSearch["allowed_domains"] = allowedDomains;
+        }
+
+        if (blockedDomains != null && blockedDomains.Length > 0)
+        {
+            webSearch["blocked_domains"] = blockedDomains;
+        }
+
         var requestPayload = new
         {
             model = "reka-flash-research",
-
             messages = new[]
             {
-                    new
-                    {
-                        role = "user",
-                        content = query
-                    }
-                },
+                new
+                {
+                    role = "user",
+                    content = query
+                }
+            },
 
             response_format = GetResponseFormat(),
-
             research = new
             {
-                web_search = new
-                {
-                    //allowed_domains = new string[] { "tripadvisor.com" },
-                    // blocked_domains = new string[] { "ubereats.com" },
-                    max_uses = 3,
-                    user_location = new
-                    {
-                        approximate = new
-                        {
-                            city = userLocationApproximate?.Town,
-                            region = userLocationApproximate?.Region,
-                            country = userLocationApproximate?.Country
-                        }
-                    }
-                }
+                web_search = webSearch
             },
         };
 

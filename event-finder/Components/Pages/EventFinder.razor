@@ -34,18 +34,34 @@
                 <FluentTextField 
                     @bind-Value="searchParameters.UserLocation!.Town" 
                     Label="Town / City" 
-                    Placeholder="ex: Seattle" 
-                    ReadOnly="@autoLocationRetrieved" />
+                    Placeholder="ex: Seattle" />
                 <FluentTextField 
                     @bind-Value="searchParameters.UserLocation!.Region" 
                     Label="State / Region" 
-                    Placeholder="ex: WA" 
-                    ReadOnly="@autoLocationRetrieved" />
+                    Placeholder="ex: WA" />
                 <FluentTextField 
                     @bind-Value="searchParameters.UserLocation!.Country" 
                     Label="Country" 
-                    Placeholder="ex: US" 
-                    ReadOnly="@autoLocationRetrieved" />
+                    Placeholder="ex: US" />
+            </FluentStack>
+
+            <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="10" VerticalGap="10" VerticalAlignment="VerticalAlignment.Bottom">
+
+                <FluentTextField
+                    @bind-Value="searchParameters.AllowedDomains"
+                    Label="Allowed Domains"
+                    Placeholder="ex: tripadvisor.com, meetup.com"
+                    Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.BlockedDomains))">
+                </FluentTextField>
+
+                <FluentLabel Color="@Color.Accent"> Allowed OR Blocked Domains, not both</FluentLabel>
+                
+                <FluentTextField
+                    @bind-Value="searchParameters.BlockedDomains"
+                    Label="Blocked Domains"
+                    Placeholder="ex: ubereats.com, facebook.com"
+                    Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.AllowedDomains))">
+                </FluentTextField>
             </FluentStack>
 
             <FluentButton   @onclick="Search"
@@ -119,7 +135,6 @@ else if (events.Any())
     private List<ReasoningStep> reasoningSteps = new();
     private TimeSpan elapsedTime = TimeSpan.Zero;
     private string status = "Getting started...";
-    private bool autoLocationRetrieved = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -139,7 +154,6 @@ else if (events.Any())
                         searchParameters.UserLocation.Town = userLocation.Town;
                         searchParameters.UserLocation.Region = userLocation.Region;
                         searchParameters.UserLocation.Country = userLocation.Country;
-                        autoLocationRetrieved = true;
                         UpdateStatus($"Location found: {userLocation.Town}, {userLocation.Region}, {userLocation.Country}");
                     }
                     else
@@ -165,7 +179,16 @@ else if (events.Any())
         {
             var stopwatch = Stopwatch.StartNew();
             UpdateStatus("Searching for events...");
-            var result = await Service.GetEventReferences(searchParameters.Topic, searchParameters.UserLocation);
+
+            // Convert comma-separated domains to string arrays
+            string[]? allowedDomains = string.IsNullOrWhiteSpace(searchParameters.AllowedDomains)
+                ? null
+                : searchParameters.AllowedDomains.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            string[]? blockedDomains = string.IsNullOrWhiteSpace(searchParameters.BlockedDomains)
+                ? null
+                : searchParameters.BlockedDomains.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var result = await Service.GetEventReferences(searchParameters.Topic, searchParameters.UserLocation, allowedDomains, blockedDomains);
             UpdateStatus("Processing results...");
             stopwatch.Stop();
             elapsedTime = stopwatch.Elapsed;

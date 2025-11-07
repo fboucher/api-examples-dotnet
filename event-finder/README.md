@@ -1,8 +1,8 @@
 # Reka Tech Event Finder
 
-This demo showcases how to use **Reka Research** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use Reka Research and its advanced features to discover relevant tech events.
+This demo showcases how to use **Reka Research** to build intelligent apps that can search the web, structure responses, and support reasoning. It’s designed to help developers learn how to integrate and use [Reka Research](https://docs.reka.ai/research) and its advanced features to discover relevant tech events.
 
-![screen capture](../assets/capture-events.png)
+![screen capture](../assets/events_finder.png)
 
 > Requirement:
 >
@@ -21,15 +21,36 @@ Voilà! Your are all set!
 
 ## 2. Run the demo
 
-1) From the project folder, execute `dotnet run`.
+1) Clone the repository:
+   ```bash
+   git clone https://github.com/reka-ai/api-examples-dotnet.git
+   ```
 
-## 3. Modify the code
+2) Navigate to the project folder:
+   ```bash
+   cd api-examples-dotnet/event-finder
+   ```
 
-Open the project in your favorite IDE/editor and you can look at [Services/RekaResearchService.cs](Services/RekaResearchService.cs) and change different parameters to see how it works.
+3) Run the project:
+   ```bash
+   dotnet run
+   ```
 
-- `allowed_domains` or `blocked_domains`
-- `response_format` to control the output
-- `max_uses` to limit the number of searches
+
+
+## 3. Try it out
+
+Once the application is running: 
+
+- search for different topics (e.g., AI, .NET)
+- Try to change the location (e.g., New York, Berlin), or only keep the country
+- Only allow spefici domains (e.g., techcrunch.com)
+
+For each research have a look to the reasoning steps and the final structured results.
+
+## 4. Checkout the code
+
+Open the project in your favorite IDE/ editor and you can look at [Services/RekaResearchService.cs](Services/RekaResearchService.cs) and change different parameters to see how it works.
 
 ## References
 

@@ -1,0 +1,283 @@
+@page "/event-finder"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.FluentUI.AspNetCore.Components
+@using event_finder.Components.Shared
+@using event_finder.Domain
+@using System.Diagnostics
+@inject event_finder.Services.RekaResearchService Service
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject event_finder.Services.LocationService LocationService
+
+@rendermode InteractiveServer
+
+<PageTitle>Event Finder</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="30">
+    
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="10">
+            <FluentLabel Typo="Typography.H3">
+                <FluentIcon Value="@(new Icons.Regular.Size24.Calendar())" Color="@Color.Accent" />
+                Find Tech Events
+            </FluentLabel>
+            <FluentDivider Style="width: 100%;" />
+            <FluentLabel Typo="Typography.Body">
+                Discover technology events and conferences near you
+            </FluentLabel>
+        </FluentStack>
+    </FluentCard>
+
+    <FluentCard>
+        <EditForm Model="@searchParameters">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+
+                <DataAnnotationsValidator />
+                <FluentValidationSummary />
+                
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="8">
+                    <FluentLabel Typo="Typography.H5">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Search())" />
+                        Search Topic
+                    </FluentLabel>
+                    <FluentTextField 
+                        @bind-Value=searchParameters.Topic 
+                        Label="What tech topic are you interested in?"
+                        Required
+                        Placeholder="ex: AI, cloud, .NET"
+                        Style="width: 100%; max-width: 600px;">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.LightbulbFilament())" Slot="start" />
+                    </FluentTextField>
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+                    <FluentLabel Typo="Typography.H5">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Location())" />
+                        Location
+                    </FluentLabel>
+                    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="12" VerticalGap="12">
+                        <FluentTextField 
+                            @bind-Value="searchParameters.UserLocation!.Town" 
+                            Label="Town / City" 
+                            Placeholder="ex: Seattle"
+                            Style="min-width: 200px;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Building())" Slot="start" />
+                        </FluentTextField>
+                        <FluentTextField 
+                            @bind-Value="searchParameters.UserLocation!.Region" 
+                            Label="State / Region" 
+                            Placeholder="ex: WA"
+                            Style="min-width: 150px;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.MapDrive())" Slot="start" />
+                        </FluentTextField>
+                        <FluentTextField 
+                            @bind-Value="searchParameters.UserLocation!.Country" 
+                            Label="Country" 
+                            Placeholder="ex: US"
+                            Style="min-width: 150px;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Globe())" Slot="start" />
+                        </FluentTextField>
+                    </FluentStack>
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+                    <FluentLabel Typo="Typography.H5">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Filter())" />
+                        Domain Filters (Optional)
+                    </FluentLabel>
+                    <FluentMessageBar Intent="@MessageIntent.Info">
+                        You can either allow specific domains OR block domains, but not both.
+                    </FluentMessageBar>
+                    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="16" VerticalGap="12">
+                        <FluentTextField
+                            @bind-Value="searchParameters.AllowedDomains"
+                            Label="Allowed Domains"
+                            Placeholder="ex: tripadvisor.com, meetup.com"
+                            Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.BlockedDomains))"
+                            Style="min-width: 300px; flex: 1;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Checkmark())" Slot="start" Color="@Color.Success" />
+                        </FluentTextField>
+                        
+                        <FluentTextField
+                            @bind-Value="searchParameters.BlockedDomains"
+                            Label="Blocked Domains"
+                            Placeholder="ex: ubereats.com, facebook.com"
+                            Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.AllowedDomains))"
+                            Style="min-width: 300px; flex: 1;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Dismiss())" Slot="start" Color="@Color.Error" />
+                        </FluentTextField>
+                    </FluentStack>
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.Center">
+                    <FluentButton   
+                        @onclick="Search"
+                        Loading="@isLoading"
+                        IconStart="@(new Icons.Regular.Size20.Search())"  
+                        Appearance="Appearance.Accent">
+                        Search Events
+                    </FluentButton>
+                </FluentStack>
+            
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+
+    @if (!string.IsNullOrWhiteSpace(status))
+    {
+        <FluentCard>
+            <FluentLabel Typo="Typography.Body">
+                <FluentIcon Value="@(new Icons.Regular.Size16.Info())" Color="@Color.Accent" />
+                @status
+            </FluentLabel>
+        </FluentCard>
+    }
+
+</FluentStack>
+
+@if (isLoading)
+{
+    <FluentProgress></FluentProgress>
+    <p>@status</p>
+}
+else if (events.Any())
+{
+    <div>
+        <p>Request took: @($"{(int)elapsedTime.TotalMinutes}m {elapsedTime.Seconds}s")</p>
+    </div>
+    <FluentTabs>
+
+    <FluentTab Label="Results" Id="tab-result" Icon="@(new Icons.Filled.Size24.Map())" >
+            <FluentDataGrid Items="@events" ResizableColumns="true" >
+                <ChildContent>
+                    <PropertyColumn Property="@(e => e.Name)" Title="Name" Sortable="true" />
+                    <TemplateColumn Title="Start" Sortable="true">
+                        @((context.StartDate?.ToString("yyyy-MM-dd")) ?? "")
+                    </TemplateColumn>
+                    <TemplateColumn Title="End" Sortable="true">
+                        @((context.EndDate?.ToString("yyyy-MM-dd")) ?? "")
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(e => e.City ?? string.Empty)" Title="City" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Country ?? string.Empty)" Title="Country" Sortable="true" />
+                    <TemplateColumn Title="URL" Sortable="true" >
+                        <FluentAnchor Href="@(context.Url ?? "#")" title="Event website" Appearance="Appearance.Hypertext">@(context.Url ?? "N/A")</FluentAnchor>
+                    </TemplateColumn>
+                </ChildContent>
+                <EmptyContent>
+                    <FluentIcon Value="@(new Icons.Filled.Size24.Crown())" Color="@Color.Accent" />&nbsp; Nothing yet. Pick a topic and search for events!
+                </EmptyContent>
+            </FluentDataGrid>
+
+        </FluentTab>
+
+        <FluentTab Label="Reasoning"  Id="tab-reasons" Icon="@(new Icons.Filled.Size24.Map())">
+            @if (reasoningSteps.Any())
+            {
+                @foreach (var step in reasoningSteps)
+                {
+                    <ReasoningStepDisplay Step="step" />
+                }
+            }
+            else
+            {
+                <p>No reasoning steps available.</p>
+            }
+        </FluentTab>
+
+    </FluentTabs>
+}
+
+
+@code {
+    private SearchParameters searchParameters = new SearchParameters();
+    private IQueryable<TechEvent> events = new List<TechEvent>().AsQueryable();
+    private bool isLoading = false;
+    private List<ReasoningStep> reasoningSteps = new();
+    private TimeSpan elapsedTime = TimeSpan.Zero;
+    private string status = "Getting started...";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // ensure object exists for binding
+            searchParameters.UserLocation ??= new UserLocationApproximate();
+            try
+            {
+                UpdateStatus("Detecting your location...");
+                var position = await JSRuntime.InvokeAsync<Position>("eval", "new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(p => resolve({Coordinates: {Latitude: p.coords.latitude, Longitude: p.coords.longitude}}), reject); })");
+                if (position != null)
+                {
+                    var userLocation = await LocationService.GetLocationDetailsFromPosition(position);
+                    if (userLocation != null)
+                    {
+                        searchParameters.UserLocation.Town = userLocation.Town;
+                        searchParameters.UserLocation.Region = userLocation.Region;
+                        searchParameters.UserLocation.Country = userLocation.Country;
+                        UpdateStatus($"Location found: {userLocation.Town}, {userLocation.Region}, {userLocation.Country}");
+                    }
+                    else
+                    {
+                        UpdateStatus("Could not resolve location details.");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                UpdateStatus("Location permission denied or unavailable.");
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchParameters.Topic)) return;
+
+        isLoading = true;
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+            UpdateStatus("Searching for events...");
+
+            // Convert comma-separated domains to string arrays
+            string[]? allowedDomains = string.IsNullOrWhiteSpace(searchParameters.AllowedDomains)
+                ? null
+                : searchParameters.AllowedDomains.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            string[]? blockedDomains = string.IsNullOrWhiteSpace(searchParameters.BlockedDomains)
+                ? null
+                : searchParameters.BlockedDomains.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var result = await Service.GetEventReferences(searchParameters.Topic, searchParameters.UserLocation, allowedDomains, blockedDomains);
+            UpdateStatus("Processing results...");
+            stopwatch.Stop();
+            elapsedTime = stopwatch.Elapsed;
+            events = result.Events.AsQueryable();
+            reasoningSteps = result.ReasoningSteps;
+            UpdateStatus("Done!");
+        }
+        catch (Exception)
+        {
+            events = new List<TechEvent>().AsQueryable();
+            reasoningSteps = new();
+            UpdateStatus("An error occurred while searching. Please try again.");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void UpdateStatus(string newStatus)
+    {
+        status = newStatus;
+        StateHasChanged();
+    }
+}

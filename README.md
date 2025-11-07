@@ -17,6 +17,7 @@ This repository showcases how to use **Reka Research** and **Reka Vision** to bu
 |----------------------------------------------------|-------------------------------------------------------------------------------|
 | [`csharp10-script/`](./csharp10-script/README.md)  | Three ways to use C# 10 file-based (preview) without full projects via Reka APIs |
 | [`reka-restaurant/`](./reka-restaurant/README.md)  | Restaurant search sample using Reka Deep Search with advanced features        |
+| [`event-finder/`](./event-finder/README.md)        | Find relevant tech events using Reka Research with web search and reasoning   |
 | [`video-analyzer/`](./video-analyzer/README.md)    | Get insights from videos using AI. Search across multiple videos or inspect one |
 
 ## 🧪 Why use this repo?

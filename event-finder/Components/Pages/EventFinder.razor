@@ -14,66 +14,133 @@
 
 <PageTitle>Event Finder</PageTitle>
 
-<h1>Find Tech Events</h1>
-
-<div>
-    <EditForm Model="@searchParameters">
-        <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
-
-            <DataAnnotationsValidator />
-            <FluentValidationSummary />
-            <div>
-                <FluentTextField    @bind-Value=searchParameters.Topic 
-                                    Label="What tech topic are you interested in?"
-                                    Required
-                                    Placeholder="ex: AI, cloud, .NET"
-                                    style="width: 80%;"></FluentTextField>
-            </div>
-
-            <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="10" VerticalGap="10" VerticalAlignment="VerticalAlignment.Bottom">
-                <FluentTextField 
-                    @bind-Value="searchParameters.UserLocation!.Town" 
-                    Label="Town / City" 
-                    Placeholder="ex: Seattle" />
-                <FluentTextField 
-                    @bind-Value="searchParameters.UserLocation!.Region" 
-                    Label="State / Region" 
-                    Placeholder="ex: WA" />
-                <FluentTextField 
-                    @bind-Value="searchParameters.UserLocation!.Country" 
-                    Label="Country" 
-                    Placeholder="ex: US" />
-            </FluentStack>
-
-            <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="10" VerticalGap="10" VerticalAlignment="VerticalAlignment.Bottom">
-
-                <FluentTextField
-                    @bind-Value="searchParameters.AllowedDomains"
-                    Label="Allowed Domains"
-                    Placeholder="ex: tripadvisor.com, meetup.com"
-                    Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.BlockedDomains))">
-                </FluentTextField>
-
-                <FluentLabel Color="@Color.Accent"> Allowed OR Blocked Domains, not both</FluentLabel>
-                
-                <FluentTextField
-                    @bind-Value="searchParameters.BlockedDomains"
-                    Label="Blocked Domains"
-                    Placeholder="ex: ubereats.com, facebook.com"
-                    Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.AllowedDomains))">
-                </FluentTextField>
-            </FluentStack>
-
-            <FluentButton   @onclick="Search"
-                            Loading="@isLoading"
-                            IconStart="@(new Icons.Regular.Size16.ArrowClockwise())"  
-                            Appearance="Appearance.Accent">Search</FluentButton>
-        
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="30">
+    
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="10">
+            <FluentLabel Typo="Typography.H3">
+                <FluentIcon Value="@(new Icons.Regular.Size24.Calendar())" Color="@Color.Accent" />
+                Find Tech Events
+            </FluentLabel>
+            <FluentDivider Style="width: 100%;" />
+            <FluentLabel Typo="Typography.Body">
+                Discover technology events and conferences near you
+            </FluentLabel>
         </FluentStack>
-    </EditForm>
-</div>
+    </FluentCard>
 
-<p>@status</p>
+    <FluentCard>
+        <EditForm Model="@searchParameters">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+
+                <DataAnnotationsValidator />
+                <FluentValidationSummary />
+                
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="8">
+                    <FluentLabel Typo="Typography.H5">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Search())" />
+                        Search Topic
+                    </FluentLabel>
+                    <FluentTextField 
+                        @bind-Value=searchParameters.Topic 
+                        Label="What tech topic are you interested in?"
+                        Required
+                        Placeholder="ex: AI, cloud, .NET"
+                        Style="width: 100%; max-width: 600px;">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.LightbulbFilament())" Slot="start" />
+                    </FluentTextField>
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+                    <FluentLabel Typo="Typography.H5">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Location())" />
+                        Location
+                    </FluentLabel>
+                    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="12" VerticalGap="12">
+                        <FluentTextField 
+                            @bind-Value="searchParameters.UserLocation!.Town" 
+                            Label="Town / City" 
+                            Placeholder="ex: Seattle"
+                            Style="min-width: 200px;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Building())" Slot="start" />
+                        </FluentTextField>
+                        <FluentTextField 
+                            @bind-Value="searchParameters.UserLocation!.Region" 
+                            Label="State / Region" 
+                            Placeholder="ex: WA"
+                            Style="min-width: 150px;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.MapDrive())" Slot="start" />
+                        </FluentTextField>
+                        <FluentTextField 
+                            @bind-Value="searchParameters.UserLocation!.Country" 
+                            Label="Country" 
+                            Placeholder="ex: US"
+                            Style="min-width: 150px;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Globe())" Slot="start" />
+                        </FluentTextField>
+                    </FluentStack>
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+                    <FluentLabel Typo="Typography.H5">
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Filter())" />
+                        Domain Filters (Optional)
+                    </FluentLabel>
+                    <FluentMessageBar Intent="@MessageIntent.Info">
+                        You can either allow specific domains OR block domains, but not both.
+                    </FluentMessageBar>
+                    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="16" VerticalGap="12">
+                        <FluentTextField
+                            @bind-Value="searchParameters.AllowedDomains"
+                            Label="Allowed Domains"
+                            Placeholder="ex: tripadvisor.com, meetup.com"
+                            Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.BlockedDomains))"
+                            Style="min-width: 300px; flex: 1;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Checkmark())" Slot="start" Color="@Color.Success" />
+                        </FluentTextField>
+                        
+                        <FluentTextField
+                            @bind-Value="searchParameters.BlockedDomains"
+                            Label="Blocked Domains"
+                            Placeholder="ex: ubereats.com, facebook.com"
+                            Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.AllowedDomains))"
+                            Style="min-width: 300px; flex: 1;">
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Dismiss())" Slot="start" Color="@Color.Error" />
+                        </FluentTextField>
+                    </FluentStack>
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.Center">
+                    <FluentButton   
+                        @onclick="Search"
+                        Loading="@isLoading"
+                        IconStart="@(new Icons.Regular.Size20.Search())"  
+                        Appearance="Appearance.Accent">
+                        Search Events
+                    </FluentButton>
+                </FluentStack>
+            
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+
+    @if (!string.IsNullOrWhiteSpace(status))
+    {
+        <FluentCard>
+            <FluentLabel Typo="Typography.Body">
+                <FluentIcon Value="@(new Icons.Regular.Size16.Info())" Color="@Color.Accent" />
+                @status
+            </FluentLabel>
+        </FluentCard>
+    }
+
+</FluentStack>
 
 @if (isLoading)
 {

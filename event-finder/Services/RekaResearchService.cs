@@ -13,12 +13,12 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
     private readonly ILogger<RekaResearchService> _logger = logger;
 
 
-    public async Task<EventResponse> GetEventReferences(string topic, string nearCity)
+    public async Task<EventResponse> GetEventReferences(string topic, UserLocationApproximate? userLocationApproximate)
     {
         //var requestUrl = "http://localhost:5085/research";
         var requestUrl = "https://api.reka.ai/v1/chat/completions";
 
-        var query = $"You are a tech events recommender. The user is interested in {topic}. Find 3 upcoming or recent tech events related to this topic near the specified city. Always respond as JSON that matches the provided schema.";
+        var query = $"You are a tech events recommender. The user is interested in {topic}. Find 3 upcoming tech events related to this topic near the specified city. Always respond as JSON that matches the provided schema.";
 
         var eventResponse = new EventResponse();
 
@@ -43,13 +43,14 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
                 {
                     //allowed_domains = new string[] { "tripadvisor.com" },
                     // blocked_domains = new string[] { "ubereats.com" },
-                    max_uses = 4,
+                    max_uses = 3,
                     user_location = new
                     {
                         approximate = new
                         {
-                            city = "San Francisco"
-
+                            city = userLocationApproximate?.Town,
+                            region = userLocationApproximate?.Region,
+                            country = userLocationApproximate?.Country
                         }
                     }
                 }
@@ -64,7 +65,7 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
         _logger.LogInformation($"Request Payload: {jsonPayload}");
 
 
-    await SaveToFile("request", topic, jsonPayload ?? string.Empty);
+        await SaveToFile("request", jsonPayload ?? string.Empty);
 
         HttpResponseMessage? response = null;
 
@@ -77,7 +78,7 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
             response = await _http.SendAsync(request);
             var responseContent = await response.Content.ReadAsStringAsync();
 
-            await SaveToFile(topic, nearCity, responseContent);
+            await SaveToFile("response", responseContent);
 
             var rekaResponse = JsonSerializer.Deserialize<RekaResponse>(responseContent);
 
@@ -101,10 +102,10 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
     }
 
 
-    private async Task SaveToFile(string mood, string city, string responseContent)
+    private async Task SaveToFile(string prefix, string responseContent)
     {
         string datetime = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-        string fileName = $"{mood}_{city}_{datetime}.json";
+        string fileName = $"{prefix}_{datetime}.json";
         string folderPath = "Data";
         Directory.CreateDirectory(folderPath);
         string filePath = Path.Combine(folderPath, fileName);

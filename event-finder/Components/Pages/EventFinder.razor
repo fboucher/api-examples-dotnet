@@ -110,19 +110,20 @@ else if (events.Any())
         {
             UpdateStatus("Getting your location...");
             var position = await JSRuntime.InvokeAsync<Position>("eval", "new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(p => resolve({Coordinates: {Latitude: p.coords.latitude, Longitude: p.coords.longitude}}), reject); })");
+            UserLocationApproximate? userLocation = null;
             if (position != null)
             {
-                var city = await LocationService.GetCityFromPosition(position);
-                if (city != null)
+                userLocation = await LocationService.GetLocationDetailsFromPosition(position);
+                if (userLocation != null)
                 {
-                    searchParameters.City = city;
-                    UpdateStatus($"Location found: {city}");
+                    searchParameters.UserLocation = userLocation;
+                    UpdateStatus($"Location found: {userLocation.Town}, {userLocation.Region}, {userLocation.Country}");
                 }
             }
 
             var stopwatch = Stopwatch.StartNew();
             UpdateStatus("Searching for events...");
-            var result = await Service.GetEventReferences(searchParameters.Topic, searchParameters.City ?? "montreal");
+            var result = await Service.GetEventReferences(searchParameters.Topic, userLocation);
             UpdateStatus("Processing results...");
             stopwatch.Stop();
             elapsedTime = stopwatch.Elapsed;

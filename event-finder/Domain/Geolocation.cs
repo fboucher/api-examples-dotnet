@@ -19,13 +19,13 @@ public class UserLocation
     [JsonPropertyName("village")]
     public string? Village { get; set; }
 
-    [JsonPropertyName("country")]
+    [JsonPropertyName("country_code")]
     public string? Country { get; set; }
 
     [JsonPropertyName("timezone")]
     public string? Timezone { get; set; }
     
-    [JsonPropertyName("region")]
+    [JsonPropertyName("state")]
     public string? Region { get; set; }
 }
 

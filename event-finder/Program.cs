@@ -10,7 +10,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddFluentUIComponents();
 builder.Services.AddHttpClient<RekaResearchService>(client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(300);  // Set to 5 minutes, adjust as needed
+    client.Timeout = TimeSpan.FromMinutes(5);  // Set to 5 minutes, adjust as needed
 });
 builder.Services.AddHttpClient<LocationService>();
 

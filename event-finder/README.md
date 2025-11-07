@@ -36,8 +36,6 @@ Voilà! Your are all set!
    dotnet run
    ```
 
-
-
 ## 3. Try it out
 
 Once the application is running: 
@@ -51,6 +49,40 @@ For each research have a look to the reasoning steps and the final structured re
 ## 4. Checkout the code
 
 Open the project in your favorite IDE/ editor and you can look at [Services/RekaResearchService.cs](Services/RekaResearchService.cs) and change different parameters to see how it works.
+
+## Diagram
+
+Here is a diagram to illustrate where the information is coming from and going to during for initiate a Research.
+```mermaid
+%%{ init : { "look": "handDrawn", "flowchart" : { "curve" : "linear" }}}%%
+
+flowchart LR
+
+        A[Events Finder] --> B[browser]
+        B --> |lat, lng| A
+        A --> |lat, lng| C[GetCityFromCoordinates https://nominatim.openstreetmap.org]
+        C --> |city, area| A
+   
+        A -->|mood, user location| D[Reka Research https://api.reka.ai/v1]
+        D --> |Eevents, reasoning steps| A
+```
+
+And here is a sequence diagram to illustrate the flow of information:
+
+```mermaid
+sequenceDiagram
+autonumber
+
+Events Finder ->> Browser : Get Coordinates
+Browser->> Events Finder: lat, lng
+
+Events Finder ->> nominatim.openstreetmap.org: Get City From Coordinates
+nominatim.openstreetmap.org ->> Events Finder: city, area
+
+Events Finder ->> Reka Research  (api.reka.ai/v1) :topic, user location, domains 
+Reka Research (api.reka.ai/v1) ->> Events Finder: Events, reasoning steps
+  
+```
 
 ## References
 

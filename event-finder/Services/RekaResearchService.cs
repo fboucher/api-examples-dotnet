@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using event_finder.Domain;
+using Reka.SDK;
 
 namespace event_finder.Services;
 
@@ -103,7 +104,7 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
 
             if (response.IsSuccessStatusCode)
             {
-                var answer = rekaResponse!.Choices![0]!.Message!.ParsedContent?.Events;
+                var answer = rekaResponse!.Choices![0]!.Message!.ParsedContent<EventsResponse>()?.Events;
                 eventResponse.Events = answer ?? new List<TechEvent>();
                 eventResponse.ReasoningSteps = rekaResponse.Choices[0].Message!.ReasoningSteps ?? new List<ReasoningStep>();
             }

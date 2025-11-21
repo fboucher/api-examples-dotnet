@@ -1,3 +1,5 @@
+using Reka.SDK;
+
 namespace event_finder.Domain;
 
 public class SearchParameters

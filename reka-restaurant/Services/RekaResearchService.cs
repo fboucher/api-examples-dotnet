@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Reka.SDK;
 using web.Domain;
 
 namespace web.Services;
@@ -83,7 +84,7 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
 
             if (response.IsSuccessStatusCode)
             {
-                var answerStr = rekaResponse!.Choices![0]!.Message!.ParsedContent?.Restaurants;
+                var answerStr = rekaResponse!.Choices![0]!.Message!.ParsedContent<RestaurantsResponse>()?.Restaurants;
                 restaurantResponse.Restaurants = answerStr ?? new List<Restaurant>();
                 restaurantResponse.ReasoningSteps = rekaResponse.Choices[0].Message!.ReasoningSteps ?? new List<ReasoningStep>();
             }

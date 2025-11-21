@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.FluentUI.AspNetCore.Components
+@using Reka.SDK
 @using event_finder.Components.Shared
 @using event_finder.Domain
 @using System.Diagnostics
@@ -97,7 +98,7 @@
                         <FluentTextField
                             @bind-Value="searchParameters.AllowedDomains"
                             Label="Allowed Domains"
-                            Placeholder="ex: tripadvisor.com, meetup.com"
+                            Placeholder="ex: meetup.com"
                             Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.BlockedDomains))"
                             Style="min-width: 300px; flex: 1;">
                             <FluentIcon Value="@(new Icons.Regular.Size16.Checkmark())" Slot="start" Color="@Color.Success" />
@@ -106,7 +107,7 @@
                         <FluentTextField
                             @bind-Value="searchParameters.BlockedDomains"
                             Label="Blocked Domains"
-                            Placeholder="ex: ubereats.com, facebook.com"
+                            Placeholder="ex: reddit.com, facebook.com"
                             Disabled="@(!string.IsNullOrWhiteSpace(searchParameters.AllowedDomains))"
                             Style="min-width: 300px; flex: 1;">
                             <FluentIcon Value="@(new Icons.Regular.Size16.Dismiss())" Slot="start" Color="@Color.Error" />

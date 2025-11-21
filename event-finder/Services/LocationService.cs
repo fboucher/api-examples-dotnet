@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using event_finder.Domain;
+using Reka.SDK;
 
 namespace event_finder.Services;
 

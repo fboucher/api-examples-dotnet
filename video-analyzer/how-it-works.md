@@ -12,7 +12,7 @@
 
 ## Overview
 
-Video Analyzer is a **Blazor Server** application built with **.NET 9.0** that leverages the **Reka AI Vision API** to provide intelligent video analysis capabilities. The application enables users to upload videos, perform semantic searches across video content, ask questions about specific videos, and generate study materials or presentation evaluations.
+Video Analyzer is a **Blazor Server** application built with **.NET 10.0** that leverages the **Reka AI Vision API** to provide intelligent video analysis capabilities. The application enables users to upload videos, perform semantic searches across video content, ask questions about specific videos, and generate study materials or presentation evaluations.
 
 The application uses a clean architecture with separation of concerns between the UI components (Blazor Razor components), business logic (Services), and domain models.
 
@@ -20,7 +20,7 @@ The application uses a clean architecture with separation of concerns between th
 
 ### Technology Stack
 
-- **Framework**: ASP.NET Core 9.0 (Blazor Server with Interactive Server rendering)
+- **Framework**: ASP.NET Core 10.0 (Blazor Server with Interactive Server rendering)
 - **UI Library**: Microsoft Fluent UI Components
 - **Markdown Processing**: Markdig
 - **API Integration**: Reka AI Vision API

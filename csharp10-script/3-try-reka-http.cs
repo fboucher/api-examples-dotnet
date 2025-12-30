@@ -4,7 +4,7 @@
 using DotNetEnv;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using System.Text.Json.Serialization;
 
 Env.Load();
 
@@ -13,28 +13,18 @@ var REKA_API_KEY = Environment.GetEnvironmentVariable("REKA_API_KEY")!;
 using var httpClient = new HttpClient();
 httpClient.Timeout = Timeout.InfiniteTimeSpan;
 
-var baseUrl = "http://api.reka.ai/v1/chat/completions";
+var baseUrl = "https://api.reka.ai/v1/chat/completions";
 
-var requestPayload = new
-{
-    model = "reka-flash-research",
-    messages = new[]
-            {
-                new
-                {
-                    role = "user",
-                    content = "Give me 3 nice, not crazy expensive, restaurants for a romantic dinner in New York city"
-                }
-            }
-};
+var requestPayload = new ChatRequest(
+    Model: "reka-flash-research",
+    Messages: new[]
+    {
+        new ChatMessage(
+            Role: "user",
+            Content: "Give me 3 nice, not crazy expensive, restaurants for a romantic dinner in New York city")
+    });
 
-var jsonOptions = new JsonSerializerOptions
-{
-    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    TypeInfoResolver = new DefaultJsonTypeInfoResolver()
-};
-
-var jsonPayload = JsonSerializer.Serialize(requestPayload, jsonOptions);
+var jsonPayload = JsonSerializer.Serialize(requestPayload, ChatRequestContext.Default.ChatRequest);
 
 using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl);
 request.Headers.Add("Authorization", $"Bearer {REKA_API_KEY}");
@@ -63,3 +53,13 @@ catch (Exception ex)
 {
     Console.WriteLine($"Unexpected error: {ex.Message}");
 }
+
+[JsonSerializable(typeof(ChatRequest))]
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+internal partial class ChatRequestContext : JsonSerializerContext
+{
+}
+
+internal sealed record ChatRequest(string Model, ChatMessage[] Messages);
+
+internal sealed record ChatMessage(string Role, string Content);

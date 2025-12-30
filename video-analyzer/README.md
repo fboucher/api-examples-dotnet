@@ -15,7 +15,7 @@ A web application that leverages Reka AI Vision to provide powerful video analys
 
 ## Prerequisites
 
-- .NET 9.0 or Docker/Podman
+- .NET 10.0 or Docker/Podman
 - Reka AI API key (it's free! Get yours from [here from Reka](https://link.reka.ai/free))
 
 ## Running the Application

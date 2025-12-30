@@ -9,7 +9,7 @@ public class RekaVisionService : IRekaVisionService
     private readonly ILogger<RekaVisionService> _logger;
     private readonly string _rekaAPIKey;
     private readonly JsonSerializerOptions _jsonOptions;
-    private const string BaseEndpoint = "https://vision-agent.api.reka.ai";
+    private const string BaseEndpoint = "https://vision-agent.api.reka.ai/v1";
 
     public RekaVisionService(HttpClient httpClient, ILogger<RekaVisionService> logger, IConfiguration configuration)
     {
@@ -129,7 +129,7 @@ public class RekaVisionService : IRekaVisionService
     /// <returns>A list of search results with timestamps</returns>
     public async Task<List<SearchResult>> Search(string query)
     {
-        var request = CreateRequest(HttpMethod.Post, $"{BaseEndpoint}/search/hybrid");
+        var request = CreateRequest(HttpMethod.Post, $"{BaseEndpoint}/search");
 
         var requestBody = new
         {

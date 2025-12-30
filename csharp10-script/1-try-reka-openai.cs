@@ -1,6 +1,6 @@
 
 #:package DotNetEnv@3.1.1
-#:package OpenAI@2.3.0
+#:package OpenAI@2.8.0
 
 using DotNetEnv;
 using OpenAI.Chat;
@@ -10,7 +10,7 @@ using System.ClientModel;
 Env.Load();
 
 var REKA_API_KEY = Environment.GetEnvironmentVariable("REKA_API_KEY")!; 
-var baseUrl = "http://api.reka.ai/v1";
+var baseUrl = "https://api.reka.ai/v1";
 
 var openAiClient = new OpenAIClient(new ApiKeyCredential(REKA_API_KEY), new OpenAIClientOptions
 {

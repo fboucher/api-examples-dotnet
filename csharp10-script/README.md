@@ -1,59 +1,42 @@
-# C# Script demos with Reka API
+# C# Script demos with Reka Research API
 
-Reka API's are compatible with open AI that made them very easy to swap and be used because it's a very common structure this represents to read you will see multiple example that use different different APIs and different and different scenario while using the latest feature of.net that is script. Script is a very fun feature where you don't need a project to have a program written in C#.
+Five examples that all do the same thing — find tech events — each using a different approach to call the [Reka API](https://docs.reka.ai/). Built as [.NET file-based apps](https://learn.microsoft.com/dotnet/core/whats-new/dotnet-10#file-based-apps): single `.cs` files, no `.csproj` needed.
 
 ![screen capture](../assets/capture-file-based.png)
 
-Requirement:
+## Setup
 
-- Have .NET 10 preview installed or Docker or CodeSpace
+Requires [.NET 10](https://dotnet.microsoft.com/download).
 
-If you don't have .NET install on you computer use the devContainer with [Docker](https://code.visualstudio.com/docs/devcontainers/tutorial) or [CodeSpace](https://docs.github.com/en/codespaces/quickstart) to create your workspace.
+> [!TIP]
+> No .NET installed? Use the devContainer with [Docker](https://code.visualstudio.com/docs/devcontainers/tutorial) or [CodeSpace](https://docs.github.com/en/codespaces/quickstart).
 
-## 1. Get your API key
+1. Get a free API key from the [Reka Platform dashboard](https://link.reka.ai/free)
+2. Copy `.env-sample` to `.env` and paste your key in place of *HERE_GOES_YOUR_API_KEY*
 
-1) Go to the [Reka Platform dashboard](https://link.reka.ai/free)
-2) Open the API Keys section on the left
-3) Create a new key and copy it to your environment
-4) Rename the file `.env-sample` `.env`, and replace the place holder (*HERE_GOES_YOUR_API_KEY*) by the key you just created.
+## Examples
 
-Voilà! Your are all set!
+| # | File | Approach |
+| --- | ------ | ---------- |
+| 1 | [1-try-reka-openai.cs](./1-try-reka-openai.cs) | OpenAI SDK |
+| 2 | [2-try-reka-ms-ext.cs](./2-try-reka-ms-ext.cs) | Microsoft Extension AI for OpenAI |
+| 3 | [3-try-reka-agent-fwk.cs](./3-try-reka-agent-fwk.cs) | Microsoft Agent Framework |
+| 4 | [4-try-reka-agent-fwk-structured.cs](./4-try-reka-agent-fwk-structured.cs) | Agent Framework with structured output |
+| 5 | [5-try-reka-http.cs](./5-try-reka-http.cs) | Raw HTTP — no SDK, just HttpClient |
 
-## Try Reka
+Run any example with:
 
-There are three example in this repository doing exactly the same thing but using different method to achieve it.
-
-- **[1-try-1-try-reka-openai](./1-try-reka-openai.cs)**: Using the OpenAI SDK
-- **[2-try-reka-ms-ext](./2-try-reka-ms-ext.cs)**: Using the Microsoft Extension AI for OpenAI
-- **[3-try-reka-http](./3-try-reka-http.cs)**: Using the HttpClient to call Reka API directly
-
-To try any of them you just need to open a terminal in the folder of the example you want to try and type:
-
-```csharp
-dotnet run 1-try-reka-openai.cs
+```bash
+dotnet run <filename>
 ```
 
-or
+For example: `dotnet run 1-try-reka-openai.cs`
 
-```csharp
-dotnet run 2-try-reka-ms-ext.cs
-```
+## Learn more
 
-or
+- [Reka API docs](https://docs.reka.ai/)
+- [Discord community](https://discord.com/invite/MTRJEBvH)
+- [Blog post: Using AI with .NET 10 Scripts](https://www.frankysnotes.com/2025/09/using-ai-with-net-10-scripts-what.html)
+- [Video](https://www.youtube.com/watch?v=JwFHKQkah30)
 
-```csharp
-dotnet run 3-try-reka-http.cs
-```
-
-After a little while you should see three restaurant recommendation for your trip in Montreal.
-
-## Do more
-
-You can change the prompt to get different recommendation or you can change the location to get recommendation for another city. You can also modify the code and use more advance feature of Reka's API! You can find all the documentation on [https://docs.reka.ai/](https://docs.reka.ai/). You should join our community on [Discord](https://discord.com/invite/MTRJEBvH).
-
-This code was used in a blog post and video that you can find here
-
-- [Blog post: Using AI with .NET 10 Scripts: What Worked, What Didn’t, and Lessons Learned](https://www.frankysnotes.com/2025/09/using-ai-with-net-10-scripts-what.html)
-- [Video ](https://www.youtube.com/watch?v=JwFHKQkah30)
-
-  ![Using AI with .NET 10 Scripts: What Worked, What Didn’t, and Lessons Learned](../assets/dotnet-ai-file-based.jpg)
+  ![Using AI with .NET 10 Scripts: What Worked, What Didn't, and Lessons Learned](../assets/dotnet-ai-file-based.jpg)

@@ -149,10 +149,29 @@ and the gotchas along the way.
 
 ---
 
+<!-- _class: title -->
+
+## AI with .NET
+
+```csharp
+var process = Process.Start(new ProcessStartInfo
+{
+    FileName = "python",
+    Arguments = "script.py",
+    RedirectStandardOutput = true,
+    UseShellExecute = false
+})!;
+
+Console.WriteLine(await process.StandardOutput.ReadToEndAsync());
+await process.WaitForExitAsync();
+```
+
+---
+
 ## Agenda
 
 - Context & setup
-- 6 demos: One task. Done 6 different ways.
+- 7 demos: One task. Done 7 different ways.
 - Gotchas & wrap-up
 
 ---
@@ -177,7 +196,7 @@ We're just here to make an API call. 6 times.
 
 ---
 
-## The prompt we'll use — 6 times
+## The prompt we'll use — 7 times
 
 Same question. Different tool each time.
 
@@ -508,6 +527,48 @@ internal partial class ChatRequestContext : JsonSerializerContext { }
 
 ---
 
+## Demo 7 — Raw HttpClient + Web Search + Structured Output
+
+```csharp
+var requestJson = new JsonObject
+{
+    ["model"] = modelName,
+    ["messages"] = new JsonArray(
+        new JsonObject { ["role"] = "user", ["content"] = prompt }
+    ),
+    ["response_format"] = GetResponseFormat(),   // JSON schema
+    ["research"] = new JsonObject                // Reka-specific
+    {
+        ["web_search"] = new JsonObject
+        {
+            ["allowed_domains"] = new JsonArray(
+                "sessionize.com", "microsoft.com", "github.com")
+        }
+    }
+};
+var jsonPayload = requestJson.ToJsonString();
+```
+
+---
+
+## Demo 7 — Raw HttpClient (advanced) · Key points
+
+**Same zero-dependency approach as Demo 6 — but with Reka's advanced features.**
+
+<div class="row-g"><strong>Web search + domain filtering</strong>Reka's <code>research.web_search</code> field grounds answers in live results from approved sites.</div>
+
+<div class="row-g"><strong>Structured output via JSON schema</strong>No SDK support needed — just send the schema in <code>response_format</code> directly.</div>
+
+<div class="box-orange">
+
+**Gotcha: `JsonSerializerContext` disables reflection globally**
+Defining a `JsonSerializerContext` in the same assembly prevents `JsonSerializer.Serialize`
+from working on anonymous types. Fix: use `JsonObject`/`JsonNode` instead — no reflection needed.
+
+</div>
+
+---
+
 ## Lessons & Gotchas
 
 <div class="row-r"><strong>HttpClient.Timeout</strong>The default 100s WILL silently kill slow AI responses. Set <code>InfiniteTimeSpan</code> or something reasonable.</div>
@@ -532,6 +593,7 @@ internal partial class ChatRequestContext : JsonSerializerContext { }
 | Need typed / structured responses | Agent SDK + structured output | #4 |
 | Need web search (OpenAI OK) | OpenAI Responses API | #5 |
 | No SDK dependency / max portability | Raw HttpClient | #6 |
+| Web search + structured output (Reka) | Raw HttpClient (advanced) | #7 |
 
 ---
 
@@ -541,7 +603,7 @@ internal partial class ChatRequestContext : JsonSerializerContext { }
 
 `github.com/fboucher/api-examples-dotnet`
 
-All 6 demos run with just a free API key.
+All 7 demos run with just a free API key.
 `dotnet run <filename>.cs`
 
 ---

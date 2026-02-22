@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using event_finder.Domain;
 using Reka.SDK;
 
@@ -104,9 +105,9 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
 
             if (response.IsSuccessStatusCode)
             {
-                var answer = rekaResponse!.Choices![0]!.Message!.ParsedContent<EventsResponse>()?.Events;
-                eventResponse.Events = answer ?? new List<TechEvent>();
-                eventResponse.ReasoningSteps = rekaResponse.Choices[0].Message!.ReasoningSteps ?? new List<ReasoningStep>();
+                var message = rekaResponse!.Choices![0]!.Message!;
+                eventResponse.Events = ParseEventsWithFallback(message);
+                eventResponse.ReasoningSteps = message.ReasoningSteps ?? new List<ReasoningStep>();
             }
             else
             {
@@ -119,6 +120,128 @@ public class RekaResearchService(HttpClient httpClient, IConfiguration config, I
         }
 
         return eventResponse;
+    }
+
+    private List<TechEvent> ParseEventsWithFallback(dynamic message)
+    {
+        try
+        {
+            return message.ParsedContent<EventsResponse>()?.Events ?? new List<TechEvent>();
+        }
+        catch (JsonException jsonEx)
+        {
+            _logger.LogWarning("Structured parse failed, trying recovery from message.content. Details: {Message}", jsonEx.Message);
+        }
+
+        string? content = message.Content?.ToString();
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return new List<TechEvent>();
+        }
+
+        if (TryDeserializeEvents(content, out var events))
+        {
+            return events;
+        }
+
+        var repairedJson = RepairPotentiallyMalformedJson(content);
+        if (TryDeserializeEvents(repairedJson, out events))
+        {
+            _logger.LogInformation("Recovered event parsing from repaired JSON content.");
+            return events;
+        }
+
+        _logger.LogWarning("Unable to parse event list from assistant message content after recovery attempts.");
+        return new List<TechEvent>();
+    }
+
+    private static bool TryDeserializeEvents(string json, out List<TechEvent> events)
+    {
+        events = new List<TechEvent>();
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<EventsResponse>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true,
+                ReadCommentHandling = JsonCommentHandling.Skip
+            });
+
+            events = parsed?.Events ?? new List<TechEvent>();
+            return parsed?.Events is not null;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private static string RepairPotentiallyMalformedJson(string content)
+    {
+        var json = content.Trim();
+
+        if (json.StartsWith("```") && json.EndsWith("```"))
+        {
+            json = Regex.Replace(json, "^```(?:json)?\\s*", string.Empty, RegexOptions.IgnoreCase);
+            json = Regex.Replace(json, "\\s*```$", string.Empty);
+        }
+
+        var firstBrace = json.IndexOf('{');
+        if (firstBrace >= 0)
+        {
+            json = json[firstBrace..];
+        }
+
+        json = Regex.Replace(json, @",(\s*[\]}])", "$1");
+
+        int openObjects = 0;
+        int openArrays = 0;
+        bool inString = false;
+        bool escaped = false;
+
+        foreach (var ch in json)
+        {
+            if (escaped)
+            {
+                escaped = false;
+                continue;
+            }
+
+            if (ch == '\\')
+            {
+                escaped = true;
+                continue;
+            }
+
+            if (ch == '"')
+            {
+                inString = !inString;
+                continue;
+            }
+
+            if (inString)
+            {
+                continue;
+            }
+
+            if (ch == '{') openObjects++;
+            else if (ch == '}' && openObjects > 0) openObjects--;
+            else if (ch == '[') openArrays++;
+            else if (ch == ']' && openArrays > 0) openArrays--;
+        }
+
+        if (openArrays > 0)
+        {
+            json += new string(']', openArrays);
+        }
+
+        if (openObjects > 0)
+        {
+            json += new string('}', openObjects);
+        }
+
+        return json;
     }
 
 

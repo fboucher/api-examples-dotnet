@@ -14,13 +14,14 @@ var API_KEY = Environment.GetEnvironmentVariable("OPENAI_API_KEY")!;
 var baseUrl = "https://api.openai.com/v1";
 var modelName = "gpt-5";
 
-// == OnlY works with OpenAI
+// == OnlY works with OpenAI ===================
+
 // var API_KEY = Environment.GetEnvironmentVariable("REKA_API_KEY")!;
 // var baseUrl = "https://api.reka.ai/v1";
 // var modelName = "reka-flash-research";
 
 // var API_KEY = "ollama";
-// var baseUrl = "http://192.168.2.11:11434/v1/";
+// var baseUrl = "http://127.0.0.1:11434/v1/";
 // var modelName = "llama3.1:8b";
 
 string[] allowedDomains =

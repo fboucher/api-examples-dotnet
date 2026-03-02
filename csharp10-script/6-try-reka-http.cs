@@ -17,7 +17,7 @@ var modelName = "reka-flash-research";
 // var modelName = "gpt-5";
 
 // var API_KEY = "ollama";
-// var baseUrl = "http://192.168.2.11:11434/v1/chat/completions";
+// var baseUrl = "http://127.0.0.1:11434/v1/chat/completions";
 // var modelName = "llama3.1:8b";
 
 using var httpClient = new HttpClient();

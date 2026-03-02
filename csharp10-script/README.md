@@ -1,6 +1,6 @@
 # C# Script demos with Reka Research API
 
-Six examples that all do the same thing — find tech events — each using a different approach to call the [Reka API](https://docs.reka.ai/). Built as [.NET file-based apps](https://learn.microsoft.com/dotnet/core/whats-new/dotnet-10#file-based-apps): single `.cs` files, no `.csproj` needed.
+Seven examples that all do the same thing — find tech events — each using a different approach to call the [Reka API](https://docs.reka.ai/). Built as [.NET file-based apps](https://learn.microsoft.com/dotnet/core/whats-new/dotnet-10#file-based-apps): single `.cs` files, no `.csproj` needed.
 
 ![screen capture](../assets/capture-file-based.png)
 
@@ -24,6 +24,7 @@ Requires [.NET 10](https://dotnet.microsoft.com/download).
 | 4 | [4-try-reka-agent-fwk-structured.cs](./4-try-reka-agent-fwk-structured.cs) | Agent Framework with structured output |
 | 5 | [5-try-reka-openai-advanced.cs](./5-try-reka-openai-advanced.cs) | OpenAI SDK with advanced web search beta and only with OpenAI APIs |
 | 6 | [6-try-reka-http.cs](./6-try-reka-http.cs) | Raw HTTP — no SDK, just HttpClient but all features and all APIs |
+| 7 | [7-try-reka-http-advanced.cs](./7-try-reka-http-advanced.cs) | Raw HTTP with web search and structured output (Reka-specific features) |
 
 Run any example with:
 

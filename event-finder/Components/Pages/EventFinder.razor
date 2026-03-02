@@ -159,12 +159,8 @@ else if (events.Any())
             <FluentDataGrid Items="@events" ResizableColumns="true" >
                 <ChildContent>
                     <PropertyColumn Property="@(e => e.Name)" Title="Name" Sortable="true" />
-                    <TemplateColumn Title="Start" Sortable="true">
-                        @((context.StartDate?.ToString("yyyy-MM-dd")) ?? "")
-                    </TemplateColumn>
-                    <TemplateColumn Title="End" Sortable="true">
-                        @((context.EndDate?.ToString("yyyy-MM-dd")) ?? "")
-                    </TemplateColumn>
+                    <PropertyColumn Property="@(e => e.StartDate ?? string.Empty)" Title="Start Date" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.EndDate ?? string.Empty)" Title="End Date" Sortable="true" />
                     <PropertyColumn Property="@(e => e.City ?? string.Empty)" Title="City" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Country ?? string.Empty)" Title="Country" Sortable="true" />
                     <TemplateColumn Title="URL" Sortable="true" >

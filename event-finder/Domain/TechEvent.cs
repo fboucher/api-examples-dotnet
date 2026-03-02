@@ -8,10 +8,10 @@ public class TechEvent
     public string? Name { get; set; }
 
     [JsonPropertyName("startDate")]
-    public DateTime? StartDate { get; set; }
+    public string? StartDate { get; set; }
 
     [JsonPropertyName("endDate")]
-    public DateTime? EndDate { get; set; }
+    public string? EndDate { get; set; }
 
     [JsonPropertyName("city")]
     public string? City { get; set; }

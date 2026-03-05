@@ -129,7 +129,7 @@ public class RekaVisionService : IRekaVisionService
     /// <returns>A list of search results with timestamps</returns>
     public async Task<List<SearchResult>> Search(string query)
     {
-        var request = CreateRequest(HttpMethod.Post, $"{BaseEndpoint}/search");
+        var request = CreateRequest(HttpMethod.Post, $"{BaseEndpoint}/videos/search");
 
         var requestBody = new
         {
@@ -146,15 +146,15 @@ public class RekaVisionService : IRekaVisionService
         {
             // SaveResponseToFile(responseContent);
 
-            var results = JsonSerializer.Deserialize<List<RekaSearchResultDto>>(responseContent, _jsonOptions);
+            var response = JsonSerializer.Deserialize<RekaSearchResponse>(responseContent, _jsonOptions);
 
-            if (results == null)
+            if (response == null)
             {
                 _logger.LogWarning("No search results found in response or response format unexpected");
                 return new List<SearchResult>();
             }
 
-            var domainResults = results.Select(r => new SearchResult
+            var domainResults = response.Results.Select(r => new SearchResult
             {
                 VideoChunkId = Guid.Parse(r.VideoChunkId),
                 VideoId = Guid.Parse(r.VideoId),

@@ -1,8 +1,13 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace VideoAnalyzer.Services;
 
 public class RekaQAAnswerDto
 {
-    public string chat_response { get; set; } = string.Empty;
+    // chat_response can be a plain string or a JSON object per the Reka API spec
+    [JsonPropertyName("chat_response")]
+    public JsonElement? ChatResponse { get; set; }
     public string? system_message { get; set; }
     public string? error { get; set; }
     public string status { get; set; } = string.Empty;

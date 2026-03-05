@@ -217,7 +217,7 @@ public class RekaVisionService : IRekaVisionService
 
             var answer = new QAAnswer
             {
-                Answer = rekaResponse.chat_response,
+                Answer = ExtractAnswerText(rekaResponse.ChatResponse),
                 Confidence = 1.0, // API does not provide confidence
                 VideoId = Guid.Parse(videoId),
                 Question = question,
@@ -284,6 +284,55 @@ public class RekaVisionService : IRekaVisionService
             Metadata = dto.Metadata,
             IndexingType = dto.IndexingType
         };
+    }
+
+    private static string ExtractAnswerText(System.Text.Json.JsonElement? element)
+    {
+        if (!element.HasValue || element.Value.ValueKind == System.Text.Json.JsonValueKind.Null)
+            return string.Empty;
+
+        if (element.Value.ValueKind == System.Text.Json.JsonValueKind.String)
+        {
+            var str = element.Value.GetString() ?? string.Empty;
+            if (str.TrimStart().StartsWith("{"))
+            {
+                try
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(str);
+                    var extracted = ExtractFromSectionsObject(doc.RootElement);
+                    if (!string.IsNullOrEmpty(extracted)) return extracted;
+                }
+                catch { /* not JSON — return str as-is */ }
+            }
+            return str;
+        }
+
+        if (element.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+        {
+            var extracted = ExtractFromSectionsObject(element.Value);
+            if (!string.IsNullOrEmpty(extracted)) return extracted;
+        }
+
+        return element.Value.GetRawText();
+    }
+
+    private static string ExtractFromSectionsObject(System.Text.Json.JsonElement obj)
+    {
+        if (!obj.TryGetProperty("sections", out var sections)
+            || sections.ValueKind != System.Text.Json.JsonValueKind.Array)
+            return string.Empty;
+
+        var parts = new System.Text.StringBuilder();
+        foreach (var section in sections.EnumerateArray())
+        {
+            if (section.TryGetProperty("markdown", out var md)
+                && md.ValueKind == System.Text.Json.JsonValueKind.String)
+            {
+                if (parts.Length > 0) parts.AppendLine();
+                parts.Append(md.GetString());
+            }
+        }
+        return parts.ToString();
     }
 
     /// <summary>

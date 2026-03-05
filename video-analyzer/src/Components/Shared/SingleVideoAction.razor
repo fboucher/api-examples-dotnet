@@ -80,13 +80,13 @@
         switch (actionType)
         {
             case ActionType.AskQuestion:
-                instructions = searchTerm;
+                instructions = $"Respond in plain markdown format. Do not use JSON.\n\n{searchTerm}";
                 break;
             case ActionType.HelpStudying:
-                instructions = $"Look at the topic covered in the vide. First, provide a concise summary of the main topics covered in the video. Then, generate a list of 5 multiple-choice questions (with 4 options each) related to the video's content. Finally, provide the answers to the questions with a brief explanation. Answer in markdown format.";
+                instructions = "Respond in plain markdown format using headings, bullet points, and bold text. Do not use JSON.\n\nLook at the topic covered in the video. First, provide a concise summary of the main topics covered in the video. Then, generate a list of 5 multiple-choice questions (with 4 options each) related to the video's content. Finally, provide the answers to the questions with a brief explanation.";
                 break;
             case ActionType.EvaluateVideo:
-                instructions = $"Evaluate the presentation skills demonstrated in the video. Provide feedback on aspects such as clarity, engagement, body language, and overall effectiveness. Offer constructive criticism and suggest areas for improvement. Answer in markdown format.";
+                instructions = "Respond in plain markdown format using headings and bullet points. Do not use JSON.\n\nEvaluate the presentation skills demonstrated in the video. Provide feedback on aspects such as clarity, engagement, body language, and overall effectiveness. Offer constructive criticism and suggest areas for improvement.";
                 break;
         }
         await DoAction(instructions);
